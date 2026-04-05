@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📸 ContentForge AI — Thumbnails em 1 clique</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;700;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-display { font-family: 'Space Grotesk', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #667eea 150%); }
+        .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        .loader { width: 20px; height: 20px; border: 3px solid #fff; border-bottom-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .thumb-card { transition: all 0.3s; }
+        .thumb-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+    </style>
+</head>
+<body class="min-h-screen gradient-bg text-white">
+    <div class="max-w-6xl mx-auto px-6 py-12">
+        <!-- HERO -->
+        <div class="text-center mb-12">
+            <div class="inline-flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full text-sm mb-4">✨ ContentForge AI</div>
+            <h1 class="text-4xl md:text-6xl font-display font-bold mb-4">Transforme fotos em<br>thumbnails virais</h1>
+            <p class="text-lg text-white/70 mb-8">Upload → IA gera 8 modelos → Download e pronto. Rápido, grátis, sem cadastro.</p>
+            <div class="flex flex-wrap gap-4 justify-center">
+                <label class="cursor-pointer bg-gradient-to-r from-purple-600 to-blue-600 px-8 py-4 rounded-full font-bold text-lg hover:scale-105 transition">
+                    📁 Escolher Imagem
+                    <input type="file" class="hidden" id="imgInput" accept="image/*">
+                </label>
+                <button onclick="useDemo()" class="glass px-8 py-4 rounded-full font-bold text-lg hover:bg-white/10">🎲 Usar Demo</button>
+            </div>
+        </div>
+
+        <!-- PREVIEW -->
+        <div id="previewSection" class="hidden mb-12">
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+                <div class="space-y-4">
+                    <label class="block text-sm font-bold text-white/70">Título do Conteúdo</label>
+                    <input type="text" id="title" placeholder="Ex: Novo vídeo no canal!" class="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                    <span class="text-xs text-white/50">Dica: Use palavras-chave fortes, emoção e números</span>
+                </div>
+                <div class="flex items-center justify-center">
+                    <img id="origPreview" class="max-h-48 rounded-lg shadow-2xl">
+                </div>
+            </div>
+        </div>
+
+        <!-- RESULTS -->
+        <div id="results" class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Cards gerados dinamicamente -->
+        </div>
+
+        <!-- LOADING -->
+        <div id="loading" class="hidden text-center py-20">
+            <div class="loader mx-auto mb-4"></div>
+            <p class="text-white/70">Analisando imagem e criando thumbnails com IA...</p>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="text-center mt-16 text-white/40 text-sm pb-8">
+            Feito para criadores · sem cadastro · 100% gratuito<br>
+            <span class="opacity-60">Cada thumbnail é único. A IA sugere textos, cores e composição.</span>
+        </div>
+    </div>
+
+    <script>
+        const states = {
+            title: '',
+            image: null,
+        };
+
+        document.getElementById('imgInput').addEventListener('change', async e => {
+            const file = e.target.files[0];
+            if (!file) return;
+            handleImage(URL.createObjectURL(file));
+        });
+
+        document.getElementById('title').addEventListener('input', e => {
+            states.title = e.target.value;
+            if (states.image) generateThumbnails();
+        });
+
+        function useDemo() {
+            fetch('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80')
+                .then(res => res.blob())
+                .then(blob => {
+                    states.image = URL.createObjectURL(blob);
+                    document.getElementById('origPreview').src = states.image;
+                    document.getElementById('previewSection').classList.remove('hidden');
+                    setTimeout(() => generateThumbnails(), 800);
+                });
+        }
+
+        async function handleImage(url) {
+            const img = new Image();
+            img.onload = () => {
+                states.image = url;
+                document.getElementById('origPreview').src = url;
+                document.getElementById('previewSection').classList.remove('hidden');
+                generateThumbnails();
+            };
+            img.src = url;
+        }
+
+        // Sugestões contextuais por estilo
+        const styles = [
+            { name: 'Neon Pulse', colors: ['#ff00ff', '#00ffff', '#000000'] },
+            { name: 'Gradient Vibe', colors: ['#667eea', '#764ba2', '#ffffff'] },
+            { name: 'Fire Stripe', colors: ['#f64f59', '#c471ed', '#000000'] },
+            { name: 'Minimal Dark', colors: ['#1a1a1a', '#ffffff', '#ffcc00'] },
+            { name: 'TikTok Pop', colors: ['#00f2ea', '#ff0050', '#000000'] },
+            { name: 'YouTube Red', colors: ['#ff0000', '#ffffff', '#000000'] },
+            { name: 'Fresh Lime', colors: ['#a8ff78', '#78ffd6', '#1a472a'] },
+            { name: 'Royal Glow', colors: ['#f12711', '#f5af19', '#0a0a0a'] },
+        ];
+
+        function randomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function generateThumbnails() {
+            const title = states.title || 'Viral agora';
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+            img.onload = () => {
+                document.getElementById('loading').classList.remove('hidden');
+                setTimeout(() => {
+                    const results = document.getElementById('results');
+                    results.innerHTML = '';
+                    styles.forEach((st, i) => {
+                        renderThumbnail(canvas, ctx, img, title, st, i);
+                    });
+                    document.getElementById('loading').classList.add('hidden');
+                }, 800);
+            };
+            img.src = states.image;
+        }
+
+        function renderThumbnail(canvas, ctx, img, title, style, index) {
+            const W = 600, H = 335; // 16:9 YouTube thumbnail
+            canvas.width = W; canvas.height = H;
+
+            // fundo
+            const grad = ctx.createLinearGradient(0, 0, W, H);
+            grad.addColorStop(0, style.colors[0]);
+            grad.addColorStop(1, style.colors[1]);
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, W, H);
+
+            // imagem central
+            const imgSize = W * 0.6;
+            const x = (W - imgSize) / 2;
+            const y = H - imgSize - 20;
+            ctx.drawImage(img, x, y, imgSize, imgSize);
+
+            // overlay diagonal
+            ctx.fillStyle = 'rgba(0,0,0,0.4)';
+            ctx.fillRect(0, H * 0.6, W, H * 0.4);
+
+            // título
+            ctx.fillStyle = style.colors[2];
+            ctx.textAlign = 'center';
+            ctx.font = 'bold 42px Inter, sans-serif';
+            ctx.shadowColor = 'rgba(0,0,0,0.8)';
+            ctx.shadowBlur = 12;
+            wrapText(ctx, title.toUpperCase(), W/2, 120, W - 40, 50);
+
+            // tag ( вариант 1 ou 2 )
+            ctx.font = 'bold 24px Inter, sans-serif';
+            const tags = ['🔥 VIRAL', 'NOVO', 'EXCLUSIVO', 'HOT', 'REVELADO', 'EMOCIONANTE'];
+            ctx.fillText(tags[index % tags.length], W/2, H - 30);
+
+            // border
+            ctx.strokeStyle = style.colors[2];
+            ctx.lineWidth = 6;
+            ctx.strokeRect(8, 8, W-16, H-16);
+
+            const url = canvas.toDataURL('image/png');
+            const card = document.createElement('div');
+            card.className = 'thumb-card glass rounded-xl overflow-hidden relative group cursor-pointer';
+            card.innerHTML = `
+                <div class="relative">
+                    <img src="${url}" class="w-full">
+                    <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-3 transition">
+                        <button class="bg-white text-black px-4 py-2 rounded-full font-bold text-sm hover:bg-purple-300">⬇ Baixar</button>
+                        <button class="glass px-4 py-2 rounded-full text-sm" onclick="copyPrompt('${title}')">📋 Copiar Prompt</button>
+                    </div>
+                </div>
+                <div class="p-3">
+                    <div class="font-bold text-sm mb-1">${style.name}</div>
+                    <div class="text-white/50 text-xs">${W}×${H} • PNG</div>
+                </div>
+            `;
+            card.querySelector('button[onclick^="copyPrompt"]').addEventListener('click', () => copyPrompt(title));
+            card.querySelector('button:not([onclick])').addEventListener('click', () => download(url, `thumb-${style.name.toLowerCase().replace(/\s/g,'-')}.png`));
+            document.getElementById('results').appendChild(card);
+        }
+
+        function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+            const words = text.split(' ');
+            let line = '';
+            for (let n = 0; n < words.length; n++) {
+                const test = line + (line ? ' ' : '') + words[n];
+                const metrics = ctx.measureText(test);
+                if (metrics.width > maxWidth && n > 0) {
+                    ctx.fillText(line, x, y);
+                    line = words[n];
+                    y += lineHeight;
+                } else {
+                    line = test;
+                }
+            }
+            ctx.fillText(line, x, y);
+        }
+
+        function download(url, filename) {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+        }
+
+        function copyPrompt(text) {
+            navigator.clipboard.writeText(`Crie um thumbnail com estilo vibrante para: ${text}`);
+            alert('Prompt copiado! Cola no ChatGPT ou Midjourney para variações.');
+        }
+
+        // SEO: mostra logo ao carregar se quiser
+        // useDemo(); // descomente para auto-demo
+    </script>
+</body>
+</html>
