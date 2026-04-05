@@ -17,7 +17,7 @@ Acabei de lançar um gerador de thumbnails que une IA + design programado.
 
 📸 **Resultado:** thumbnails prontos em segundos, com prompts copiáveis pra IA gerar variações.
 
-👉 Experimente: http://localhost:8081 (ou deployarei em breve!)
+👉 Deploy: **https://eng-leonardoh.github.io/contentforge-ai/**
 
 #Frontend #JavaScript #CanvasAPI #IA #DesignTools #OpenSource #ContentCreation #WebDev #Thumbnail #LinkedInTech
 
